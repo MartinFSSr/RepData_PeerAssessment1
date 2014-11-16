@@ -1,7 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 Martin Smith  
 
-Date: Sun Nov 16 17:57:00 2014
+Date: Sun Nov 16 18:45:04 2014
 
 ##Introduction
 This is a submission for a peer-assessed assignment in the Coursera *Reproducible Research* course offered by Johns Hopkins University. The assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
@@ -122,15 +122,15 @@ maxinterval = mbi[mbi$mean.steps==max(mbi$mean.steps),]
 
 *Instructions: There are missing values (coded as NA). This may introduce bias into some calculations or summaries of the data.*
 
-*Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)*
+*1.Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)*
 
-*Devise a strategy for filling in all of the missing values in the dataset.*
+*2.Devise a strategy for filling in all of the missing values in the dataset.*
 
-*Create a new dataset with the missing data filled in.*
+*3.Create a new dataset with the missing data filled in.*
 
-*Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.* 
+*4.Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.* 
     
-*Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?*
+*5.Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?*
     
 
 ```r
@@ -181,56 +181,67 @@ hist(sumbydate)
 ```
 
 ![](./PA1_template_files/figure-html/PA1_Question3_part4-1.png) 
-  
-**Interpretation: This figure provides the distribution of daily step totals for the 61 days in the data sample.  Thus the sum of the frequencies = 61.  
-Results: The most common daily step total, by far, is between 10,000 and 15,000 steps.**
 
 
-*Second part: Calculate and report the mean and median total number of steps taken per day*  
+**Result4: Interpretation: This figure provides the distribution of daily step totals for the 61 days in the data sample.  Thus the sum of the frequencies = 61.**  
+**The most common daily step total is in the 10,000-and-under interval; imputation of NAs using interval means apparently created a high-end outlier in the data.**
 
 
 ```r
 meanstepsbyday = round(mean(sumbydate), digits=1)
 medianstepsbyday = median(sumbydate)
 ```
-**Mean of total steps per day: 1.07662\times 10^{4}  
-Median of total steps per day: 9127.5849057**  
+
+**Result5:** 
+**Mean of total steps per day: 1.07662\times 10^{4}**   
+**Median of total steps per day: 9127.5849057**  
+**NOTE: Median is not an integer since non-integer mean values were used in imputation.**  
+**The imputatio process slightly increased the mean of total steps per day, while decreasing the median of total steps per day.  This result is surprising as I expected the mean to stay the same.  Someting to think about...**
+
+
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
+*Instructions:* 
+*    Create a new factor variable in the dataset with two levels - "weekday" and "weekend" indicating whether a given date is a weekday or weekend day.*  
+
+*    Make a panel plot containing a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all weekday days or weekend days (y-axis). See the README file in the GitHub repository to see an example of what this plot should look like using simulated data.*  
+    
 
 
 
 ```r
-act$workday = as.factor(ifelse(weekdays(act$date) %in% c("Saturday","Sunday"), "Weekend", "Weekday"))
-str(act)
+act2$workday = as.factor(ifelse(weekdays(act2$date) %in% c("Saturday","Sunday"), "Weekend", "Weekday"))
+str(act2)
 ```
 
 ```
 ## 'data.frame':	17568 obs. of  4 variables:
-##  $ steps   : int  NA NA NA NA NA NA NA NA NA NA ...
-##  $ date    : Date, format: "2012-10-01" "2012-10-01" ...
-##  $ interval: chr  "0" "5" "10" "15" ...
-##  $ workday : Factor w/ 2 levels "Weekday","Weekend": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ interval: chr  "0" "0" "0" "0" ...
+##  $ steps   : num  1.72 0 0 0 0 ...
+##  $ date    : Date, format: "2012-10-01" "2012-11-23" ...
+##  $ workday : Factor w/ 2 levels "Weekday","Weekend": 1 1 2 1 2 1 2 1 1 2 ...
 ```
 
 ```r
-head(act[act$interval==1200,],10)
+head(act2[act2$interval==1200,],10)
 ```
 
 ```
-##      steps       date interval workday
-## 145     NA 2012-10-01     1200 Weekday
-## 433      0 2012-10-02     1200 Weekday
-## 721     97 2012-10-03     1200 Weekday
-## 1009   160 2012-10-04     1200 Weekday
-## 1297   138 2012-10-05     1200 Weekday
-## 1585   221 2012-10-06     1200 Weekend
-## 1873    18 2012-10-07     1200 Weekend
-## 2161    NA 2012-10-08     1200 Weekday
-## 2449   211 2012-10-09     1200 Weekday
-## 2737     7 2012-10-10     1200 Weekday
+##      interval    steps       date workday
+## 1892     1200  0.00000 2012-10-15 Weekday
+## 1893     1200 63.86792 2012-10-08 Weekday
+## 1894     1200  0.00000 2012-11-28 Weekday
+## 1895     1200 51.00000 2012-11-18 Weekend
+## 1896     1200  0.00000 2012-10-24 Weekday
+## 1897     1200 63.86792 2012-11-10 Weekend
+## 1898     1200  0.00000 2012-10-02 Weekday
+## 1899     1200 58.00000 2012-11-22 Weekday
+## 1900     1200  0.00000 2012-10-16 Weekday
+## 1901     1200  0.00000 2012-11-12 Weekday
 ```
+
 
 
 ##Additional and supporting analyses
@@ -257,4 +268,3 @@ hist(nas$date, breaks=61)
   
 **Conclusion: "NA"s are grouped entirely in specific dates, as though the subject just took some days off (or maybe forgot his step-meter!) The implicaton is that it is probably best to impute a distribution of steps values for the NAs based on the overall average number of steps by interval.**
 
-![](./PA1_template_files/figure-html/PA1_extra-1.png) ![](./PA1_template_files/figure-html/PA1_extra-2.png) ![](./PA1_template_files/figure-html/PA1_extra-3.png) 
