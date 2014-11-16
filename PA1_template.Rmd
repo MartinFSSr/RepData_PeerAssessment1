@@ -1,174 +1,23 @@
 ---
 title: "Reproducible Research: Peer Assessment 1"
-author: Martin Smith
-date:
 output: 
   html_document:
     keep_md: true
-    toc: true
-    
 ---
 
-Date: `r date()`
-
-##Introduction
-This is a submission for a peer-assessed assignment in the Coursera *Reproducible Research* course offered by Johns Hopkins University. The assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
-
-The data file for analysis and the specific questions to be answered were provided by the course instructors.
-
-##Data preparation
-The source data is unzipped and read in to the *act* data frame; the *date* column is converted to data type *date*.  The *act* object is briefly examined to verify the variable data types, number of observations, and value ranges are as expected. 
 
 
 ```{r readandprep}
 act <- read.csv(unzip("activity.zip"))
 act$date = as.Date(act$date)
-act$interval = as.character(act$interval)
-str(act)
-summary(act)
-```
-
-**Notable:  
-There are `r length(act$steps[is.na(act$steps)==TRUE])` "NA" values  
-The median of all *steps* values is `r median(act$steps, na.rm=T)`**  
-----------------  
-
-
-##Question 1: What is mean total number of steps taken per day?
-
-*Instructions: What is mean total number of steps taken per day? (Ignore missing values.)*  
-
-*First part: Make a histogram of the total number of steps taken each day*
-
-```{r PA1_Question1_part1, fig.height=3.5, fig.width=5}
-sumbydate = tapply(act$steps, as.factor(act$date), sum, na.rm=TRUE)
-hist(sumbydate)
-```
-  
-**Interpretation: This figure provides the distribution of daily step totals for the 61 days in the data sample.  Thus the sum of the frequencies = 61.  
-Results: The most common daily step total, by far, is between 10,000 and 15,000 steps.**
-
-
-*Second part: Calculate and report the mean and median total number of steps taken per day*  
-
-```{r PA1_Question1_part2}
-meanstepsbyday = round(mean(sumbydate), digits=1)
-medianstepsbyday = median(sumbydate)
-```
-**Mean of total steps per day: `r meanstepsbyday`  
-Median of total steps per day: `r medianstepsbyday`**  
-
--------------
-
-
-##Question 2: What is the average daily activity pattern?
-
-*Instructions:*  
-
-*Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)*  
-  
-*Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?*  
-
-```{r Question2_part1}
-require("ggplot2")
-meansbyinterval = tapply(act$steps, as.integer(act$interval), mean, na.rm=T)
-mbi = as.data.frame(meansbyinterval)
-names(mbi)[1]="mean.steps"
-mbi$interval = as.integer(row.names(mbi))
-qplot(interval, mean.steps, data=mbi, geom="line")
-```
-
-**Results: The subject's activity peaks sharply in the morning--no surprise. Plot is slightly distorted since intervals are treated as integers vs. hours:minites, so there's a gap in the sequence every hour.**
-
-````{r Question2_part2}
-maxinterval = mbi[mbi$mean.steps==max(mbi$mean.steps),]
-````
-
-**Results: The maximum interval average number of steps is `r round(maxinterval[1], digits=1)`,**
-**at interval `r maxinterval[2]`**
-
---------
-
-## Imputing missing values
-
-*Instructions: There are missing values (coded as NA). This may introduce bias into some calculations or summaries of the data.*
-
-*Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)*
-
-*Devise a strategy for filling in all of the missing values in the dataset.*
-
-*Create a new dataset with the missing data filled in.*
-
-*Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day.* 
-    
-*Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?*
-    
-```{r Question3_part1}
-nas = act[is.na(act$steps),]
-nalen = length(nas$steps)
-```
---------------- 
-
-**Result1: There are `r nalen` NAs in the data.**
-
-**Result2: Strategy for imputing values to NAs--Based on making histograms of the observations with NA values in the steps variable** (see *Additional and Supporting Analyses*, below) **the best imputation strategy is to fill in missing values based on the average across all days of the steps taken in the interval corresponding to the missing value.**  
-
-```{r Question3_part3}
-act2 = merge(act, mbi, by="interval", all.x=TRUE)
-act2$steps = ifelse(is.na(act2$steps)==TRUE, act2$mean.steps, as.integer(act2$steps))
-act2$mean.steps = NULL
-summary(act2)
-str(act2)
-```
-
-**Result3: new dataset act2 has no NAs.**  
-
-```{r PA1_Question3_part4, fig.height=3.5, fig.width=5}
-sumbydate = tapply(act2$steps, as.factor(act$date), sum, na.rm=TRUE)
-hist(sumbydate)
-```
-  
-**Interpretation: This figure provides the distribution of daily step totals for the 61 days in the data sample.  Thus the sum of the frequencies = 61.  
-Results: The most common daily step total, by far, is between 10,000 and 15,000 steps.**
-
-
-*Second part: Calculate and report the mean and median total number of steps taken per day*  
-
-```{r PA1_Question3_part4a}
-meanstepsbyday = round(mean(sumbydate), digits=1)
-medianstepsbyday = median(sumbydate)
-```
-**Mean of total steps per day: `r meanstepsbyday`  
-Median of total steps per day: `r medianstepsbyday`**  
-
-
-## Are there differences in activity patterns between weekdays and weekends?
-
-
-```{r weekends}
 act$workday = as.factor(ifelse(weekdays(act$date) %in% c("Saturday","Sunday"), "Weekend", "Weekday"))
 str(act)
+summary(act)
 head(act[act$interval==1200,],10)
 ```
 
-
-##Additional and supporting analyses
-
-###What is the pattern of "NA" values in the data?
-This question informs the strategy for imputing values to "NA"s.  Here are frequencies of "NA"s by interval and by date.
-
-```{r nadist, fig.width=4, fig.height=3}
-##Subset out observations where steps=="NA"
-nas = act[is.na(act$steps),]
-nas$interval = as.integer(nas$interval)
-hist(nas$interval)
-##Specify breaks=61 because there are 61 days in the data
-hist(nas$date, breaks=61)
-```
-  
-**Conclusion: "NA"s are grouped entirely in specific dates, as though the subject just took some days off (or maybe forgot his step-meter!) The implicaton is that it is probably best to impute a distribution of steps values for the NAs based on the overall average number of steps by interval.**
-
-```{r PA1_extra, echo=FALSE, results='hide'}
+## What is mean total number of steps taken per day?
+```{r PA1plots}
 meansbydate = tapply(act$steps, as.factor(act$date), mean, na.rm=TRUE)
 mediansbydate = tapply(act$steps, as.factor(act$date), median, na.rm=TRUE)
 sumbydate = tapply(act$steps, as.factor(act$date), sum, na.rm=TRUE)
@@ -178,3 +27,17 @@ mediansbyinterval = tapply(act$steps, as.factor(act$interval), median, na.rm=TRU
 hist(sumbydate)
 plot(meansbydate)
 plot(mediansbydate)
+nas = act[is.na(act$steps),]
+hist(nas$interval)
+hist(nas$date, breaks=61)
+```
+
+## What is the average daily activity pattern?
+
+
+
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
