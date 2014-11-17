@@ -1,7 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 Martin Smith  
 
-Date: Sun Nov 16 18:45:04 2014
+Date: Sun Nov 16 19:29:15 2014
 
 ##Introduction
 This is a submission for a peer-assessed assignment in the Coursera *Reproducible Research* course offered by Johns Hopkins University. The assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.  
@@ -213,12 +213,13 @@ medianstepsbyday = median(sumbydate)
 
 ```r
 act2$workday = as.factor(ifelse(weekdays(act2$date) %in% c("Saturday","Sunday"), "Weekend", "Weekday"))
+act2$interval = as.integer(act2$interval)
 str(act2)
 ```
 
 ```
 ## 'data.frame':	17568 obs. of  4 variables:
-##  $ interval: chr  "0" "0" "0" "0" ...
+##  $ interval: int  0 0 0 0 0 0 0 0 0 0 ...
 ##  $ steps   : num  1.72 0 0 0 0 ...
 ##  $ date    : Date, format: "2012-10-01" "2012-11-23" ...
 ##  $ workday : Factor w/ 2 levels "Weekday","Weekend": 1 1 2 1 2 1 2 1 1 2 ...
@@ -241,6 +242,12 @@ head(act2[act2$interval==1200,],10)
 ## 1900     1200  0.00000 2012-10-16 Weekday
 ## 1901     1200  0.00000 2012-11-12 Weekday
 ```
+
+```r
+ggplot(act2, aes(interval,steps))+geom_point(color="black")+facet_wrap(~workday, nrow=2)
+```
+
+![](./PA1_template_files/figure-html/weekends-1.png) 
 
 
 
