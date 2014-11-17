@@ -160,9 +160,13 @@ act2$workday = as.factor(ifelse(weekdays(act2$date) %in% c("Saturday","Sunday"),
 act2$interval = as.integer(act2$interval)
 str(act2)
 head(act2[act2$interval==1200,],10)
-ggplot(act2, aes(interval,steps))+geom_point(color="black")+facet_wrap(~workday, nrow=2)
+mdb = aggregate(steps ~ interval + workday, data = act2, sum)
+ggplot(mdb, aes(interval,steps))+geom_point(color="black")+facet_wrap(~workday, nrow=2)
 ```
 
+  
+
+**Result: Subject apparently walks to work and gets a ride home (but not on weekends.)**
 
 
 ##Additional and supporting analyses
